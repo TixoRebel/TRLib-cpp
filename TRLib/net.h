@@ -15,16 +15,36 @@ namespace tr {
 			class client {
 				friend class ctrler;
 				private:
-					addrinfo *info;
-					client(addrinfo *info);
+					ctrler *baseCtrler;
+					SOCKET conSock = INVALID_SOCKET;
+					client(ctrler *baseCtrler);
 				public:
-					int connect();
+					ctrler *getCtrler();
+					int connect(char *address, char *port);
+					int connect(char *address, uint16_t port);
 			};
+
+			class server {
+				friend class ctrler;
+				private:
+					ctrler *baseCtrler;
+					server(ctrler *baseCtrler);
+				public:
+					ctrler *getCtrler();
+					int listen(char *port);
+					int listen(uint16_t port);
+			};
+
+			int lastSystemError = NET_GOOD;
 
 			public:
 				int init();
 				int cleanup();
-				ctrler::client *newClient(addrinfo *info);
+				int getLastSystemError();
+				int translateSystemError(int systemErr);
+				int getLastError();
+				ctrler::client *newClient();
+				ctrler::server *newServer();
 		};
 	}
 }

@@ -1,2 +1,25 @@
 ﻿  net.cpp
-  TRLib.vcxproj -> D:\andrew\Documents\Projects\cpp\TRTest\x64\Debug\TRLib.lib
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): error C2065: 'info': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): error C2227: left of '->ai_family' must point to class/struct/union/generic type
+  c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): note: type is 'unknown-type'
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): error C2227: left of '->ai_socktype' must point to class/struct/union/generic type
+  c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): note: type is 'unknown-type'
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): error C2227: left of '->ai_protocol' must point to class/struct/union/generic type
+  c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): note: type is 'unknown-type'
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(91): error C2660: 'socket': function does not take 1 arguments
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(93): error C2065: 'info': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): error C2065: 'info': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): error C2227: left of '->ai_addr' must point to class/struct/union/generic type
+  c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): note: type is 'unknown-type'
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): error C2227: left of '->ai_addrlen' must point to class/struct/union/generic type
+  c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): note: type is 'unknown-type'
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(98): error C2660: 'bind': function does not take 1 arguments
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(99): error C2065: 'info': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(103): error C2065: 'info': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(105): error C2065: 'iResult': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(105): error C2660: 'tr::net::ctrler::server::listen': function does not take 2 arguments
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(106): error C2065: 'iResult': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(107): error C3861: 'printf': identifier not found
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(114): error C2065: 'ClientSocket': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(115): error C2065: 'ClientSocket': undeclared identifier
+c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(116): error C3861: 'printf': identifier not found
