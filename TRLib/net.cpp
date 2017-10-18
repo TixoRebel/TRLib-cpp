@@ -116,8 +116,7 @@ namespace tr {
 					return 1;
 				}
 
-				iResult = ::connect(connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
-				if (iResult == SOCKET_ERROR) {
+				if (::connect(connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen) == SOCKET_ERROR) {
 					baseCtrler->lastSystemError = WSAGetLastError();
 					closesocket(connectSocket);
 					connectSocket = INVALID_SOCKET;
@@ -140,7 +139,16 @@ namespace tr {
 		int ctrler::client::connect(char *address, uint16_t port) {
 			char s_port[6];
 			sprintf_s(s_port, 5, "%uh", port);
-			connect(address, s_port);
+			return connect(address, s_port);
+		}
+
+		int ctrler::client::close() {
+			if (closesocket(conSock)) {
+				baseCtrler->lastSystemError = WSAGetLastError();
+				return 1;
+			}
+
+			return 0;
 		}
 
 		ctrler::server::server(ctrler *baseCtrler) {
@@ -158,7 +166,20 @@ namespace tr {
 		int ctrler::server::listen(uint16_t port) {
 			char s_port[6];
 			sprintf_s(s_port, 5, "%uh", port);
-			listen(s_port);
+			return listen(s_port);
+		}
+
+		SOCKET ctrler::server::accept() {
+
+		}
+
+		int ctrler::server::close() {
+			if (closesocket(listenSock)) {
+				baseCtrler->lastSystemError = WSAGetLastError();
+				return 1;
+			}
+
+			return 0;
 		}
 	}
 }

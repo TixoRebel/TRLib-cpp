@@ -22,17 +22,21 @@ namespace tr {
 					ctrler *getCtrler();
 					int connect(char *address, char *port);
 					int connect(char *address, uint16_t port);
+					int close();
 			};
 
 			class server {
 				friend class ctrler;
 				private:
 					ctrler *baseCtrler;
+					SOCKET listenSock = INVALID_SOCKET;
 					server(ctrler *baseCtrler);
 				public:
 					ctrler *getCtrler();
 					int listen(char *port);
 					int listen(uint16_t port);
+					SOCKET accept();
+					int close();
 			};
 
 			int lastSystemError = NET_GOOD;
