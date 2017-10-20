@@ -1,11 +1,23 @@
 #pragma once
 
-#include <cstdlib>
 #include <cstdint>
 
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#define CLOSE_SOCKET(socket) closesocket(socket)
+#define SYSTEM_ERROR WSAGetLastError()
+#elif defined(__unix__) || defined(__APPLE__)
+#define CLOSE_SOCKET(socket) ::close(socket)
+#define SYSTEM_ERROR errno
+#define SOCKET int
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#else
+#error Unsupported Platform
+#endif
+
 
 #include "neterr.h"
 
