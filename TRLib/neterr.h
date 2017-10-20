@@ -1,5 +1,6 @@
 #pragma once
 
+#define NET_ERROR					(std::numeric_limits<std::size_t>::max)()
 #define NET_GOOD					0
 #define NET_UNKNOWN					1
 #define NET_NOT_READY				2
@@ -36,3 +37,10 @@
 #define NET_PROTO_NO_SUPPORT		33
 #define NET_WRONG_PROTO_TYPE		34
 #define NET_PROVIDER_INIT_FAILED	35
+#define NET_NOT_CONNECTED			36
+#define NET_RESET					37
+#define NET_OP_NOT_SUPPORTED		38
+#define NET_SHUTDOWN				39
+#define NET_TOO_LONG				40
+#define NET_CONN_ABORTED			41
+#define NET_CONN_RESET				42

@@ -1,2 +1,1 @@
-﻿  net.cpp
-c:\users\andrew\documents\libs\cpp\trlib\trlib\net.cpp(156): error C4716: 'tr::net::ctrler::server::listen': must return a value
+﻿  TRLib.vcxproj -> C:\Users\Andrew\Documents\Libs\cpp\TRLib\x64\Debug\TRLib.lib

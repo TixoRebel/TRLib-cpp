@@ -12,43 +12,68 @@
 namespace tr {
 	namespace net {
 		class ctrler {
-			class client {
-				friend class ctrler;
-				private:
-					ctrler *baseCtrler;
-					SOCKET conSock = INVALID_SOCKET;
-					client(ctrler *baseCtrler);
-				public:
-					ctrler *getCtrler();
-					int connect(char *address, char *port);
-					int connect(char *address, uint16_t port);
-					int close();
-			};
+			ctrler(const ctrler& that) = delete;
 
-			class server {
-				friend class ctrler;
-				private:
-					ctrler *baseCtrler;
-					SOCKET listenSock = INVALID_SOCKET;
-					server(ctrler *baseCtrler);
-				public:
-					ctrler *getCtrler();
-					int listen(char *port);
-					int listen(uint16_t port);
-					SOCKET accept();
-					int close();
-			};
-
-			int lastSystemError = NET_GOOD;
+			static int lastSystemError;
+			static void setLastSystemError(int systemErr);
 
 			public:
-				int init();
-				int cleanup();
-				int getLastSystemError();
-				int translateSystemError(int systemErr);
-				int getLastError();
-				ctrler::client *newClient();
-				ctrler::server *newServer();
+				class socket {
+					friend class ctrler;
+					socket(const socket& that) = delete;
+
+					private:
+						SOCKET conSock = INVALID_SOCKET;
+						int lastSystemError = NET_GOOD;
+						socket(SOCKET sock);
+						void setLastSystemError(int systemErr);
+					public:
+						int getLastSystemError();
+						int getLastError();
+						size_t write(const char *buf, size_t offset, size_t len);
+						size_t read(char *buf, size_t offset, size_t len);
+				};
+
+				class client {
+					friend class ctrler;
+					client(const client& that) = delete;
+
+					private:
+						int lastSystemError = NET_GOOD;
+						client();
+						void setLastSystemError(int systemErr);
+					public:
+						int getLastSystemError();
+						int getLastError();
+						socket *connect(char *address, char *port);
+						socket *connect(char *address, uint16_t port);
+				};
+
+				class server {
+					friend class ctrler;
+					server(const server& that) = delete;
+
+					private:
+						SOCKET listenSock = INVALID_SOCKET;
+						int lastSystemError = NET_GOOD;
+						server();
+						void setLastSystemError(int systemErr);
+					public:
+						int getLastSystemError();
+						int getLastError();
+						int listen(char *port);
+						int listen(uint16_t port);
+						socket *accept();
+						int close();
+				};
+				
+				static int init();
+				static int cleanup();
+				static int getLastSystemError();
+				static int translateSystemError(int systemErr);
+				static int getLastError();
+				static ctrler::client *newClient();
+				static ctrler::server *newServer();
 		};
 	}
 }

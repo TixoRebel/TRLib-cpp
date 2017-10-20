@@ -3,6 +3,7 @@
 #include <string>
 
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -11,11 +12,12 @@
 namespace tr {
 	namespace net {
 		int ctrler::init() {
+			lastSystemError = 0;
 			WSADATA wsaData;
 			int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 			if (iResult) {
-				lastSystemError = iResult;
-				return 1;
+				setLastSystemError(iResult);
+				return -1;
 			}
 			return 0;
 		}
@@ -23,8 +25,8 @@ namespace tr {
 		int ctrler::cleanup() {
 			int iResult = WSACleanup();
 			if (iResult) {
-				lastSystemError = iResult;
-				return 1;
+				setLastSystemError(iResult);
+				return -1;
 			}
 			return 0;
 		}
@@ -71,6 +73,13 @@ namespace tr {
 				case WSAEPROTONOSUPPORT: return NET_PROTO_NO_SUPPORT;
 				case WSAEPROTOTYPE: return NET_WRONG_PROTO_TYPE;
 				case WSAEPROVIDERFAILEDINIT: return NET_PROVIDER_INIT_FAILED;
+				case WSAENOTCONN: return NET_NOT_CONNECTED;
+				case WSAENETRESET: return NET_RESET;
+				case WSAEOPNOTSUPP: return NET_OP_NOT_SUPPORTED;
+				case WSAESHUTDOWN: return NET_SHUTDOWN;
+				case WSAEMSGSIZE: return NET_TOO_LONG;
+				case WSAECONNABORTED: return NET_CONN_ABORTED;
+				case WSAECONNRESET: return NET_CONN_RESET;
 
 				default: return NET_UNKNOWN;
 			}
@@ -80,23 +89,34 @@ namespace tr {
 			return translateSystemError(getLastSystemError());
 		}
 
+		void ctrler::setLastSystemError(int systemErr) {
+			lastSystemError = systemErr;
+		}
+
 		ctrler::client *ctrler::newClient() {
-			return new ctrler::client(this);
+			return new ctrler::client();
 		}
 
 		ctrler::server *ctrler::newServer() {
-			return new ctrler::server(this);
+			return new ctrler::server();
 		}
 
-		ctrler::client::client(ctrler *baseCtrler) {
-			this->baseCtrler = baseCtrler;
+		ctrler::client::client() { }
+
+		void ctrler::client::setLastSystemError(int systemErr) {
+			lastSystemError = systemErr;
+			ctrler::setLastSystemError(systemErr);
 		}
 
-		ctrler *ctrler::client::getCtrler() {
-			return baseCtrler;
+		int ctrler::client::getLastSystemError() {
+			return lastSystemError;
 		}
 
-		int ctrler::client::connect(char *address, char *port) {
+		int ctrler::client::getLastError() {
+			return translateSystemError(lastSystemError);
+		}
+
+		ctrler::socket *ctrler::client::connect(char *address, char *port) {
 			addrinfo *result = nullptr, hints, *ptr = nullptr;
 			SOCKET connectSocket;
 			int iResult;
@@ -105,19 +125,19 @@ namespace tr {
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 			if (iResult = getaddrinfo(address, port, &hints, &result)) {
-				baseCtrler->lastSystemError = iResult;
-				return 1;
+				setLastSystemError(iResult);
+				return nullptr;
 			}
 
 			for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
-				connectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+				connectSocket = ::socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 				if (connectSocket == INVALID_SOCKET) {
-					baseCtrler->lastSystemError = WSAGetLastError();
-					return 1;
+					setLastSystemError(WSAGetLastError());
+					return nullptr;
 				}
 
 				if (::connect(connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen) == SOCKET_ERROR) {
-					baseCtrler->lastSystemError = WSAGetLastError();
+					setLastSystemError(WSAGetLastError());
 					closesocket(connectSocket);
 					connectSocket = INVALID_SOCKET;
 					continue;
@@ -128,39 +148,75 @@ namespace tr {
 			freeaddrinfo(result);
 
 			if (connectSocket == INVALID_SOCKET) {
-				baseCtrler->lastSystemError = WSAGetLastError();
-				return 1;
+				setLastSystemError(WSAGetLastError());
+				return nullptr;
 			}
 
-			conSock = connectSocket;
-			return 0;
+			return new socket(connectSocket);
 		}
 
-		int ctrler::client::connect(char *address, uint16_t port) {
+		ctrler::socket *ctrler::client::connect(char *address, uint16_t port) {
 			char s_port[6];
 			sprintf_s(s_port, 5, "%uh", port);
 			return connect(address, s_port);
 		}
 
-		int ctrler::client::close() {
-			if (closesocket(conSock)) {
-				baseCtrler->lastSystemError = WSAGetLastError();
-				return 1;
-			}
+		ctrler::server::server() { }
 
-			return 0;
+		void ctrler::server::setLastSystemError(int systemErr) {
+			lastSystemError = systemErr;
+			ctrler::setLastSystemError(systemErr);
 		}
 
-		ctrler::server::server(ctrler *baseCtrler) {
-			this->baseCtrler = baseCtrler;
+		int ctrler::server::getLastSystemError() {
+			return lastSystemError;
 		}
 
-		ctrler *ctrler::server::getCtrler() {
-			return baseCtrler;
+		int ctrler::server::getLastError() {
+			return translateSystemError(lastSystemError);
 		}
 
 		int ctrler::server::listen(char *port) {
+			addrinfo *result = nullptr, hints;
+			SOCKET listenSocket;
+			int iResult;
+			memset(&hints, 0, sizeof(hints));
+			hints.ai_family = AF_INET;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_protocol = IPPROTO_TCP;
+			hints.ai_flags = AI_PASSIVE;
+
+			iResult = getaddrinfo(NULL, port, &hints, &result);
+			if (iResult) {
+				setLastSystemError(iResult);
+				return -1;
+			}
 			
+			listenSocket = ::socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+			if (listenSocket == INVALID_SOCKET) {
+				setLastSystemError(WSAGetLastError());
+				freeaddrinfo(result);
+				return -1;
+			}
+
+			if (bind(listenSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+				setLastSystemError(WSAGetLastError());
+				freeaddrinfo(result);
+				closesocket(listenSocket);
+				return -1;
+			}
+
+			freeaddrinfo(result);
+
+			if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+				setLastSystemError(WSAGetLastError());
+				closesocket(listenSocket);
+				return -1;
+			}
+
+			listenSock = listenSocket;
+
+			return 0;
 		}
 
 		int ctrler::server::listen(uint16_t port) {
@@ -169,17 +225,73 @@ namespace tr {
 			return listen(s_port);
 		}
 
-		SOCKET ctrler::server::accept() {
+		ctrler::socket *ctrler::server::accept() {
+			SOCKET clientSocket = ::accept(listenSock, NULL, NULL);
+			if (clientSocket == INVALID_SOCKET) {
+				setLastSystemError(WSAGetLastError());
+				closesocket(listenSock);
+				return nullptr;
+			}
 
+			return new socket(clientSocket);
 		}
 
 		int ctrler::server::close() {
 			if (closesocket(listenSock)) {
-				baseCtrler->lastSystemError = WSAGetLastError();
-				return 1;
+				ctrler::lastSystemError = WSAGetLastError();
+				return -1;
 			}
 
 			return 0;
+		}
+
+		ctrler::socket::socket(SOCKET sock) {
+			this->conSock = sock;
+		}
+
+		void ctrler::socket::setLastSystemError(int systemErr) {
+			lastSystemError = systemErr;
+			ctrler::setLastSystemError(systemErr);
+		}
+
+		int ctrler::socket::getLastSystemError() {
+			return lastSystemError;
+		}
+
+		int ctrler::socket::getLastError() {
+			return translateSystemError(lastSystemError);
+		}
+
+		size_t ctrler::socket::write(const char *buf, size_t offset, size_t len) {
+			if (len == NET_ERROR) len -= 1;
+			const char *baseBuf = buf + offset;
+			size_t wrote = 0;
+			while (wrote < len) {
+				int result = send(conSock, baseBuf + wrote, (int)(len - wrote), NULL);
+				if (result == SOCKET_ERROR) {
+					setLastSystemError(WSAGetLastError());
+					return NET_ERROR;
+				}
+				wrote += result;
+			}
+
+			return wrote;
+		}
+
+		size_t ctrler::socket::read(char *buf, size_t offset, size_t len) {
+			if (len == NET_ERROR) len -= 1;
+			char *baseBuf = buf + offset;
+			size_t read = 0;
+			while (read < len) {
+				int result = recv(conSock, baseBuf + read, (int)(len - read), MSG_WAITALL);
+				if (result == SOCKET_ERROR) {
+					setLastSystemError(WSAGetLastError());
+					return NET_ERROR;
+				}
+				read += result;
+			}
+
+			return read;
 		}
 	}
 }
