@@ -260,9 +260,17 @@ namespace tr {
 			socket *sock = new socket(clientSocket);
 			if (endianNegotiation) {
 				uint32_t clientMagicNumber;
-				sock->read((char *)&clientMagicNumber, 0, sizeof(clientMagicNumber));
+				if (sock->read((char *)&clientMagicNumber, 0, sizeof(clientMagicNumber)) < sizeof(clientMagicNumber)) {
+					setLastSystemError(sock->getLastSystemError());
+					delete sock;
+					return nullptr;
+				}
 				sock->nativeEndian = clientMagicNumber == magicNumber;
-				sock->write((char *)&sock->nativeEndian, 0, sizeof(sock->nativeEndian));
+				if (sock->write((char *)&sock->nativeEndian, 0, sizeof(sock->nativeEndian)) < sizeof(sock->nativeEndian)) {
+					setLastSystemError(sock->getLastSystemError());
+					delete sock;
+					return nullptr;
+				}
 			}
 			return sock;
 		}
@@ -308,7 +316,7 @@ namespace tr {
 				int result = send(conSock, baseBuf + wrote, (int)(len - wrote), 0);
 				if (result == SOCKET_ERROR) {
 					setLastSystemError(SYSTEM_ERROR);
-					return NET_ERROR;
+					return wrote;
 				}
 				wrote += result;
 			}
@@ -323,7 +331,7 @@ namespace tr {
 				int result = recv(conSock, baseBuf + read, (int)(len - read), MSG_WAITALL);
 				if (result == SOCKET_ERROR) {
 					setLastSystemError(SYSTEM_ERROR);
-					return NET_ERROR;
+					return read;
 				}
 				read += result;
 			}
