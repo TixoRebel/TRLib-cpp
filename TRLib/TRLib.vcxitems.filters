@@ -6,10 +6,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)net.cpp" />
+    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\neterr.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\net.h">
+      <Filter>net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)net.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)neterr.h" />
+    <ClCompile Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\net.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
