@@ -131,7 +131,7 @@ namespace tr {
 			return translateSystemError(lastSystemError);
 		}
 
-		ctrler::socket *ctrler::client::connect(char *address, char *port) {
+		ctrler::socket *ctrler::client::connect(char *address, char *port, bool endianNegotiation) {
 			addrinfo *result = nullptr, hints, *ptr = nullptr;
 			SOCKET connectSocket;
 			int iResult;
@@ -167,16 +167,25 @@ namespace tr {
 				return nullptr;
 			}
 
-			return new socket(connectSocket);
+			socket *sock = new socket(connectSocket);
+			if (endianNegotiation) {
+				sock->write((const char *)&magicNumber, 0, sizeof(magicNumber));
+				sock->read((char *)&sock->nativeEndian, 0, sizeof(sock->nativeEndian));
+			}
+			return sock;
 		}
 
-		ctrler::socket *ctrler::client::connect(char *address, uint16_t port) {
+		ctrler::socket *ctrler::client::connect(char *address, uint16_t port, bool endianNegotiation) {
 			char s_port[6];
 			snprintf(s_port, 6, "%hu", port);
-			return connect(address, s_port);
+			return connect(address, s_port, endianNegotiation);
 		}
 
 		ctrler::server::server() { }
+
+		ctrler::server::~server() {
+			close();
+		}
 
 		void ctrler::server::setLastSystemError(int systemErr) {
 			lastSystemError = systemErr;
@@ -240,7 +249,7 @@ namespace tr {
 			return listen(s_port);
 		}
 
-		ctrler::socket *ctrler::server::accept() {
+		ctrler::socket *ctrler::server::accept(bool endianNegotiation) {
 			SOCKET clientSocket = ::accept(listenSock, NULL, NULL);
 			if (clientSocket == INVALID_SOCKET) {
 				setLastSystemError(SYSTEM_ERROR);
@@ -248,7 +257,14 @@ namespace tr {
 				return nullptr;
 			}
 
-			return new socket(clientSocket);
+			socket *sock = new socket(clientSocket);
+			if (endianNegotiation) {
+				uint32_t clientMagicNumber;
+				sock->read((char *)&clientMagicNumber, 0, sizeof(clientMagicNumber));
+				sock->nativeEndian = clientMagicNumber == magicNumber;
+				sock->write((char *)&sock->nativeEndian, 0, sizeof(sock->nativeEndian));
+			}
+			return sock;
 		}
 
 		int ctrler::server::close() {
@@ -264,6 +280,10 @@ namespace tr {
 			this->conSock = sock;
 		}
 
+		ctrler::socket::~socket() {
+			close();
+		}
+
 		void ctrler::socket::setLastSystemError(int systemErr) {
 			lastSystemError = systemErr;
 			ctrler::setLastSystemError(systemErr);
@@ -277,8 +297,11 @@ namespace tr {
 			return translateSystemError(lastSystemError);
 		}
 
+		bool ctrler::socket::getNativeEndian() {
+			return nativeEndian;
+		}
+
 		size_t ctrler::socket::write(const char *buf, size_t offset, size_t len) {
-			if (len == NET_ERROR) len -= 1;
 			const char *baseBuf = buf + offset;
 			size_t wrote = 0;
 			while (wrote < len) {
@@ -294,7 +317,6 @@ namespace tr {
 		}
 
 		size_t ctrler::socket::read(char *buf, size_t offset, size_t len) {
-			if (len == NET_ERROR) len -= 1;
 			char *baseBuf = buf + offset;
 			size_t read = 0;
 			while (read < len) {
@@ -307,6 +329,10 @@ namespace tr {
 			}
 
 			return read;
+		}
+
+		int ctrler::socket::close() {
+			return CLOSE_SOCKET(conSock);
 		}
 	}
 }

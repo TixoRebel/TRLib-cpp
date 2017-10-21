@@ -26,6 +26,7 @@ namespace tr {
 		class ctrler {
 			ctrler(const ctrler& that) = delete;
 
+			static const uint32_t magicNumber = 67305985;
 			static int lastSystemError;
 			static void setLastSystemError(int systemErr);
 
@@ -37,13 +38,17 @@ namespace tr {
 					private:
 						SOCKET conSock = INVALID_SOCKET;
 						int lastSystemError = NET_GOOD;
+						bool nativeEndian = false;
 						socket(SOCKET sock);
 						void setLastSystemError(int systemErr);
 					public:
+						~socket();
 						int getLastSystemError();
 						int getLastError();
+						bool getNativeEndian();
 						size_t write(const char *buf, size_t offset, size_t len);
 						size_t read(char *buf, size_t offset, size_t len);
+						int close();
 				};
 
 				class client {
@@ -57,8 +62,8 @@ namespace tr {
 					public:
 						int getLastSystemError();
 						int getLastError();
-						socket *connect(char *address, char *port);
-						socket *connect(char *address, uint16_t port);
+						socket *connect(char *address, char *port, bool endianNegotiation = true);
+						socket *connect(char *address, uint16_t port, bool endianNegotiation = true);
 				};
 
 				class server {
@@ -71,11 +76,12 @@ namespace tr {
 						server();
 						void setLastSystemError(int systemErr);
 					public:
+						~server();
 						int getLastSystemError();
 						int getLastError();
 						int listen(char *port);
 						int listen(uint16_t port);
-						socket *accept();
+						socket *accept(bool endianNegotiation = true);
 						int close();
 				};
 				

@@ -1,6 +1,7 @@
 #pragma once
 
-#define NET_ERROR					(std::numeric_limits<std::size_t>::max)()
+#define NET_ERROR					0
+
 #define NET_GOOD					0
 #define NET_UNKNOWN					1
 #define NET_NOT_READY				2
