@@ -2,19 +2,19 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="net">
-      <UniqueIdentifier>{87328658-a8d4-4393-a261-87e7182cd04e}</UniqueIdentifier>
+      <UniqueIdentifier>{b654aa21-d536-4ef4-8e18-6c54ca7f276e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib-src\..\TRLib\net.cpp">
+    <ClCompile Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\net.cpp">
       <Filter>net</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib-src\..\TRLib\net.h">
+    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\net.h">
       <Filter>net</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib-src\..\TRLib\neterr.h">
+    <ClInclude Include="C:\Users\Andrew\Documents\Libs\cpp\TRLib\TRLib\neterr.h">
       <Filter>net</Filter>
     </ClInclude>
   </ItemGroup>

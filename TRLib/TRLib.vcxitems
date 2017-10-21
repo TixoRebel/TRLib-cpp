@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{ef84d26a-f199-4b36-bb47-ce2d9b322c86}</ItemsProjectGuid>
+    <ItemsProjectGuid>{c54fcbe5-2e2b-4d6e-92cc-122ea6552126}</ItemsProjectGuid>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,10 +14,10 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\TRLib\net.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)net.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\TRLib\net.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\TRLib\neterr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)net.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)neterr.h" />
   </ItemGroup>
 </Project>
