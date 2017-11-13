@@ -200,17 +200,17 @@ namespace tr {
 			return translateSystemError(lastSystemError);
 		}
 
-		int ctrler::server::listen(char *port) {
+		int ctrler::server::listen(char *port, char *address) {
 			addrinfo *result = nullptr, hints;
 			SOCKET listenSocket;
 			int iResult;
 			memset(&hints, 0, sizeof(hints));
-			hints.ai_family = AF_INET;
+			hints.ai_family = AF_UNSPEC;
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 			hints.ai_flags = AI_PASSIVE;
 
-			iResult = getaddrinfo(NULL, port, &hints, &result);
+			iResult = getaddrinfo(address, port, &hints, &result);
 			if (iResult) {
 				setLastSystemError(iResult);
 				return -1;
@@ -243,10 +243,10 @@ namespace tr {
 			return 0;
 		}
 
-		int ctrler::server::listen(uint16_t port) {
+		int ctrler::server::listen(uint16_t port, char *address) {
 			char s_port[6];
 			snprintf(s_port, 6, "%hu", port);
-			return listen(s_port);
+			return listen(s_port, address);
 		}
 
 		ctrler::socket *ctrler::server::accept(bool endianNegotiation) {

@@ -80,8 +80,8 @@ namespace tr {
 						~server();
 						int getLastSystemError();
 						int getLastError();
-						int listen(char *port);
-						int listen(uint16_t port);
+						int listen(char *port, char *address = NULL);
+						int listen(uint16_t port, char *address = NULL);
 						socket *accept(bool endianNegotiation = true);
 						int close();
 				};
